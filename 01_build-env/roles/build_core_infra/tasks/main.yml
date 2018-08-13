@@ -3,4 +3,4 @@
 
 - name: "Debug"
   debug:
-    msg: "hello"
+    msg: "resource group name is: {{ resource_groups[0]['name'] }}"
