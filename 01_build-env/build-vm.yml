@@ -1,6 +1,6 @@
 ---
 - name: Build virtual machines
-  hosts: all
+  hosts: serverbuild
   gather_facts: no
   tasks:
 
