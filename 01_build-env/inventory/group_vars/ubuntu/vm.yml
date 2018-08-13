@@ -1,6 +1,12 @@
 ---
 
 sg: "SSH"
-admin_user: andyf
+admin_username: andyf
 vm_size: Standard_B1s
 needs_public_ip: true
+managed_disk_type: Standard_LRS
+image:
+  offer: UbuntuServer
+  publisher: Canonical
+  sku: 16.04-LTS
+  version: latest
