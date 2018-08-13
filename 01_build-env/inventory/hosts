@@ -1,6 +1,6 @@
 [all]
 localhost ansible_connection=local
-ubuntu01
+ubuntu01 ansible_host=10.10.0.2
 
 [tower]
 localhost

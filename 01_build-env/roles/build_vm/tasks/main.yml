@@ -1,6 +1,15 @@
 ---
 # Role tasks file
 
+# Optional step
+- name: Create public ip
+  azure_rm_publicipaddress:
+    resource_group: "{{ resource_groups[0]['name'] }}"
+    allocation_method: Static
+    name: "{{ inventory_hostname }}_ip"
+  delegate_to: localhost
+  when: (needs_public_ip is defined) and (needs_public_ip is True)
+
 - name: Create NIC
   azure_rm_networkinterface:
     resource_group: "{{ resource_groups[0]['name'] }}"
@@ -9,10 +18,12 @@
     subnet: "{{ subnets[0]['name'] }}"
     ip_configurations:
       - name: ipconfig1
+        private_ip_address: "{{ ansible_host }}"
         public_ip_address_name: "{{ inventory_hostname }}_ip"
         primary: true
     security_group: "{{ sg | default('SSH') }}"
   delegate_to: localhost
+
 
 # - name: Create VM
 #   azure_rm_virtualmachine:
