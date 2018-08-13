@@ -12,9 +12,9 @@
   when: (needs_public_ip is defined) and (needs_public_ip == True)
   register: pub_ip
 
-- debug: var=pub_ip
-
-- meta: end_play
+- name: debugging
+  debug: 
+    var: pub_ip
 
 - name: Create NIC
   azure_rm_networkinterface:
@@ -25,11 +25,12 @@
     ip_configurations:
       - name: ipconfig1
         private_ip_address: "{{ ansible_host }}"
-        public_ip_address_name: "{% if (needs_public_ip is defined) and (needs_public_ip == true) %}{{ inventory_hostname }}_ip{% else %}{{ omit }}{% endif %}"
+        public_ip_address_name: "{{ pub_ip.state.name | default('omit')"
         primary: true
     security_group: "{{ sg | default('SSH') }}"
   delegate_to: localhost
 
+- meta: end_play
 
 - name: Create VM
   azure_rm_virtualmachine:
