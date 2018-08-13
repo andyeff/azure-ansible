@@ -16,6 +16,15 @@
   debug: 
     var: pub_ip
 
+- name: Store public ip
+  set_fact:
+    ip_name: pub_up.state.name
+  when: (pub_ip.state is defined) and ( pub_ip.state.name is defined)
+
+- name: debug
+  debug:
+    var: ip_name
+
 - name: Create NIC
   azure_rm_networkinterface:
     resource_group: "{{ resource_groups[0]['name'] }}"
@@ -25,8 +34,7 @@
     ip_configurations:
       - name: ipconfig1
         private_ip_address: "{{ ansible_host }}"
-        # public_ip_address_name: "{% if pub_ip.state is defined %}{{ pub_ip.state.name }}{% else %}{{ dummy | default(omit) }}{% endif %}"
-        public_ip_address_name: "{{ needs_public_ip | ternary(pub_ip.state.name, omit) }}"
+        public_ip_address_name: "{{ ip_name | default(omit) }}"
         primary: true
     security_group: "{{ sg | default('SSH') }}"
   delegate_to: localhost
