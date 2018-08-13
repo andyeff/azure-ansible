@@ -30,7 +30,7 @@ subnets:
   - name: secondary
     resource_group: "{{ resource_groups[0]['name'] }}"
     ip_cidr: "10.20.0.0/24"
-    vnet: "{{ virtual_networks[0]['name'] }}"
+    vnet: "{{ virtual_networks[1]['name'] }}"
 
 security_groups:
   - name: SSH
