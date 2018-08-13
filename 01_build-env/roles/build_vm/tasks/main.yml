@@ -14,7 +14,7 @@
 
 - name: Store public ip
   set_fact:
-    ip_name: pub_up.state.name
+    ip_name: "{{ pub_ip.state.name }}""
   when: (pub_ip.state is defined) and ( pub_ip.state.name is defined)
 
 - name: Create NIC
