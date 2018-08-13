@@ -25,7 +25,7 @@
     ip_configurations:
       - name: ipconfig1
         private_ip_address: "{{ ansible_host }}"
-        public_ip_address_name: "{{ pub_ip.state.name }} | default(omit) }}"
+        public_ip_address_name: "{{ pub_ip.state.name | default(omit) }}"
         primary: true
     security_group: "{{ sg | default('SSH') }}"
   delegate_to: localhost
