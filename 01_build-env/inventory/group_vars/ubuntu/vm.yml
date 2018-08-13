@@ -3,7 +3,7 @@
 sg: "SSH"
 admin_username: andyf
 vm_size: Standard_B1s
-needs_public_ip: true
+needs_public_ip: false
 managed_disk_type: Standard_LRS
 image:
   offer: UbuntuServer
