@@ -1,0 +1,10 @@
+---
+- name: Build virtual machines
+  hosts: all
+  gather_facts: no
+  tasks:
+
+  - name: "Role: Build VMs"
+    import_role:
+      name: build_vm
+

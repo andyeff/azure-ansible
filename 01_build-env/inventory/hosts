@@ -1,3 +1,9 @@
-[tower]
+[all]
 localhost ansible_connection=local
+ubuntu01
 
+[tower]
+localhost
+
+[ubuntu]
+ubuntu01

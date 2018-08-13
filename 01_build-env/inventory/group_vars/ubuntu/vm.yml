@@ -1,0 +1,5 @@
+---
+
+sg: "SSH"
+admin_user: andyf
+vm_size: Standard_B1s
