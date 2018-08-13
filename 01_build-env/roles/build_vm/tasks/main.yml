@@ -31,8 +31,6 @@
     security_group: "{{ sg | default('SSH') }}"
   delegate_to: localhost
 
-- meta: end_play
-
 - name: Create VM
   azure_rm_virtualmachine:
     resource_group: "{{ resource_groups[0]['name'] }}"
