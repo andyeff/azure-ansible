@@ -14,7 +14,7 @@
     allocation_method: Static
     name: "{{ inventory_hostname }}_ip"
   delegate_to: localhost
-  when: (needs_public_ip is defined) and (needs_public_ip == "True")
+  when: (needs_public_ip is defined) and (needs_public_ip)
 
 - name: Create NIC
   azure_rm_networkinterface:
