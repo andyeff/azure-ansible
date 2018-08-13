@@ -1,8 +1,17 @@
 ---
 # Role tasks file
 
-# Optional step
+- name: Get subscription ID from credential
+  set_fact:
+    cred_subscription_id: "{{ lookup('env', 'AZURE_SUBSCRIPTION_ID') }}"
 
+- name: Subscription ID check
+  assert:
+    msg: "Inventory id {{ subscription_id }} MUST match credential id {{ cred_subscription_id }}"
+    that: (subscription_id == cred_subscription_id)  
+
+
+# Optional step
 - name: Create public ip
   azure_rm_publicipaddress:
     resource_group: "{{ resource_groups[0]['name'] }}"
