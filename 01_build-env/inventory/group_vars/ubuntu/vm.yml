@@ -3,4 +3,4 @@
 sg: "SSH"
 admin_user: andyf
 vm_size: Standard_B1s
-needs_public_ip: true
+needs_public_ip: yes
