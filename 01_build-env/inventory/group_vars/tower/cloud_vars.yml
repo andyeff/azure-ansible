@@ -1,0 +1,73 @@
+---
+
+# Tower will be used to build infrastructure in Azure, so variables relating to that shall be kept in here
+
+
+subscription_id: "81f3df58-7820-480f-8321-a9e1db69007f"
+
+resource_groups:
+  - name: andytest
+    location: ukwest
+
+virtual_networks:
+  - name: vnet1
+    resource_group: "{{ resource_groups[0]['name'] }}"
+    ip_cidr:
+      - "10.10.0.0/16"
+
+  - name: vnet2
+    resource_group: "{{ resource_groups[0]['name'] }}"
+    ip_cidr:
+      - "10.20.0.0/16"
+
+
+subnets:
+  - name: primary
+    resource_group: "{{ resource_groups[0]['name'] }}"
+    ip_cidr: "10.10.0.0/24"
+    vnet: "{{ virtual_networks[0]['name'] }}"
+    
+  - name: secondary
+    resource_group: "{{ resource_groups[0]['name'] }}"
+    ip_cidr: "10.20.0.0/24"
+    vnet: "{{ virtual_networks[0]['name'] }}"
+
+security_groups:
+  - name: SSH
+    purge_existing: yes
+    resource_group: "{{ resource_groups[0]['name'] }}"
+    rules:
+      - name: AllowSSH
+        protocol: Tcp
+        destination_port_range: 22
+        access: Allow
+        priority: 100
+        direction: Inbound
+        source_address_prefix:
+          - '212.159.60.64/32'
+      - name: DenySSH
+        protocol: Tcp
+        destination_port_range: 22
+        access: Deny
+        priority: 101
+        direction: Inbound
+  # - name: WEB
+  #   purge_existing: yes
+  #   resource_group: "{{ resource_groups[0]['name'] }}"
+  #   rules:
+  #     - name: AllowHTTP
+  #       protocol: Tcp
+  #       destination_port_range: 80
+  #       access: Allow
+  #       priority: 100
+  #       direction: Inbound
+  #       source_address_prefix:
+  #         - '212.159.60.64/32'
+  #     - name: AllowHTTPS
+  #       protocol: Tcp
+  #       destination_port_range: 443
+  #       access: Allow
+  #       priority: 101
+  #       direction: Inbound
+  #       source_address_prefix:
+  #         - '212.159.60.64/32'
