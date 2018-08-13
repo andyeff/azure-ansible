@@ -1,0 +1,6 @@
+---
+# Role tasks file
+
+- name: "Debug"
+  debug:
+    msg: "hello"
