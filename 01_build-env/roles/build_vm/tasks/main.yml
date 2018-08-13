@@ -20,7 +20,7 @@
     ip_configurations:
       - name: ipconfig1
         private_ip_address: "{{ ansible_host }}"
-        public_ip_address_name: " {% if needs_public_ip is defined and needs_public_ip == true %}{{ inventory_hostname }}_ip{% else %}{{ omit }}{% endif %}"
+        # public_ip_address_name: " {% if needs_public_ip is defined and needs_public_ip == true %}{{ inventory_hostname }}_ip{% else %}{{ omit }}{% endif %}"
         primary: true
     security_group: "{{ sg | default('SSH') }}"
   delegate_to: localhost
