@@ -27,6 +27,7 @@
       - name: ipconfig1
         private_ip_address: "{{ ansible_host }}"
         public_ip_address_name: "{{ ip_name | default('') }}"
+        private_ip_allocation_method: Static
         primary: true
     security_group: "{{ sg | default('SSH') }}"
   delegate_to: localhost
