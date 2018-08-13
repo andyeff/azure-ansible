@@ -2,6 +2,12 @@
 # Role tasks file
 
 # Optional step
+
+- name: debug public ip
+  debug:
+    var: needs_public_ip
+  delegate_to: localhost
+
 - name: Create public ip
   azure_rm_publicipaddress:
     resource_group: "{{ resource_groups[0]['name'] }}"
