@@ -45,11 +45,16 @@ security_groups:
         direction: Inbound
         source_address_prefix:
           - '212.159.60.64/32'
+      - name: AllowInternal
+        source_address_prefix: VirtualNetwork
+        access: Allow
+        priority: 110
+        direction: Inbound
       - name: DenySSH
         protocol: Tcp
         destination_port_range: 22
         access: Deny
-        priority: 101
+        priority: 120
         direction: Inbound
   # - name: WEB
   #   purge_existing: yes
