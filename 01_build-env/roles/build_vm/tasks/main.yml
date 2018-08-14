@@ -9,7 +9,7 @@
   assert:
     msg: "Inventory id {{ subscription_id }} MUST match credential id {{ cred_subscription_id }}"
     that: (subscription_id == cred_subscription_id)  
-
+  run_once: true
 
 # Optional step
 - name: Create public ip
