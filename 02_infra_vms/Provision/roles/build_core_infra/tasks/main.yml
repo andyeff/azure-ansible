@@ -2,15 +2,15 @@
 # Role tasks file
 
 # Enable this and matching variable in Inventory to control whether this is running in the right place
-# - name: Get subscription ID from credential
-#   set_fact:
-#     cred_subscription_id: "{{ lookup('env', 'AZURE_SUBSCRIPTION_ID') }}"
+- name: Get subscription ID from credential
+  set_fact:
+    cred_subscription_id: "{{ lookup('env', 'AZURE_SUBSCRIPTION_ID') }}"
 
 # Enable this and matching variable in Inventory to control whether this is running in the right place
-# - name: Subscription ID check
-#   assert:
-#     msg: "Inventory id {{ subscription_id }} MUST match credential id {{ cred_subscription_id }}"
-#     that: (subscription_id == cred_subscription_id)  
+- name: Subscription ID check
+  assert:
+    msg: "Inventory id {{ subscription_id }} MUST match credential id {{ cred_subscription_id }}"
+    that: (subscription_id == cred_subscription_id)  
 
 - name: Create Resource Group
   azure_rm_resourcegroup:

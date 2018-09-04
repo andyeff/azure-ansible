@@ -2,7 +2,7 @@
 
 # Enable a subscription id here
 # and in playbook to run with assert checks
-# subscription_id: "123456-abcdef-etc"
+subscription_id: "81f3df58-7820-480f-8321-a9e1db69007f"
 
 resource_groups:
   - name: andytest

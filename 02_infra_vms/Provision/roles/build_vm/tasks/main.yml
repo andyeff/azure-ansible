@@ -1,28 +1,28 @@
 ---
 # Role tasks file
 
-# - name: Get subscription ID from credential
-#   set_fact:
-#     cred_subscription_id: "{{ lookup('env', 'AZURE_SUBSCRIPTION_ID') }}"
-#   tags: create_vm
+- name: Get subscription ID from credential
+  set_fact:
+    cred_subscription_id: "{{ lookup('env', 'AZURE_SUBSCRIPTION_ID') }}"
+  tags: create_vm
 
-# - setup:
-#   delegate_to: localhost
-#   register: localvars
-#   run_once: true
+- setup:
+  delegate_to: localhost
+  register: localvars
+  run_once: true
 
-# - name: Store current date to fact
-#   set_fact:
-#     today: "{{ localvars.ansible_facts.ansible_date_time.date }}"
-#   delegate_to: localhost
-#   run_once: true
+- name: Store current date to fact
+  set_fact:
+    today: "{{ localvars.ansible_facts.ansible_date_time.date }}"
+  delegate_to: localhost
+  run_once: true
 
-# - name: Subscription ID check
-#   assert:
-#     msg: "Inventory id {{ subscription_id }} MUST match credential id {{ cred_subscription_id }}"
-#     that: (subscription_id == cred_subscription_id)  
-#   run_once: true
-#   tags: create_vm
+- name: Subscription ID check
+  assert:
+    msg: "Inventory id {{ subscription_id }} MUST match credential id {{ cred_subscription_id }}"
+    that: (subscription_id == cred_subscription_id)  
+  run_once: true
+  tags: create_vm
 
 # Upload build scripts
 # Possibly not required as will host the script on a k5-accessible server
