@@ -1,0 +1,23 @@
+---
+
+nic_sg: "H_DenyTelnet"
+vm_size: Standard_B2s
+needs_public_ip: true
+managed_disk_type: Premium_LRS
+disks:
+  - lun: 0
+    disk_size_gb: 20
+    managed_disk_type: Standard_LRS
+    mountpoint: /opt/data_disk1
+    device: /dev/sdc
+    fs: ext4
+  - lun: 1
+    disk_size_gb: 10
+    managed_disk_type: Standard_LRS
+    mountpoint: /opt/data_disk2
+    device: /dev/sdd
+
+tags:
+  cost_centre: "12345"
+  project_code: "112233"
+  expiry: "20201231"

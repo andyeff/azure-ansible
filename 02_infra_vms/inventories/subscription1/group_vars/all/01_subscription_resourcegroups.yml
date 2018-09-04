@@ -1,0 +1,9 @@
+---
+
+# Enable a subscription id here
+# and in playbook to run with assert checks
+# subscription_id: "123456-abcdef-etc"
+
+resource_groups:
+  - name: andytest
+    location: ukwest

@@ -1,0 +1,7 @@
+---
+domain_join: True
+dns_domain: k5npr.internal.horizonng.com
+dns_domain_cn: "DC=K5npr,DC=Internal,DC=Horizonng,DC=com"
+domain_join_user: "autobld"
+domain_ou_path: "K5 Cloud/Servers/Linux Servers"
+ad_dc: "kpppadc001"

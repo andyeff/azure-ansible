@@ -1,0 +1,128 @@
+---
+
+- name: Set timezone
+  timezone:
+    name: "{{ tz_region }}/{{ tz_city }}"
+  become: true
+ 
+- name: check the locale
+  command: localectl status
+  register: command_result
+  changed_when: false
+
+- name: Fix an incorrect locale
+  lineinfile:
+    dest: /etc/locale.conf
+    regexp: "^LANG"
+    line: "LANG={{ os_locale }}"
+  when: os_locale not in command_result.stdout
+  become: true
+
+- name: "Configure Chrony network time daemon"
+  template:
+    src: etc/chrony.conf.j2
+    dest: /etc/chrony.conf
+    owner: root
+    group: root
+    mode: 0644
+  register: ntpdconf
+  become: true
+
+- name: "Configure Chrony to use unprivileged user"
+  lineinfile:
+    dest: /etc/sysconfig/chronyd
+    regexp: "^(#)?OPTIONS"
+    line: "OPTIONS=\"-u chrony\""
+    state: present
+    create: yes
+  register: ntpdsysconf
+  become: true
+
+- name: Restart Chrony
+  systemd:
+    name: chronyd
+    state: restarted
+  when: ntpdconf.changed and ntpdsysconf.changed
+  become: true
+
+- name: "Disable SELinux"
+  lineinfile:
+    path: /etc/selinux/config
+    regexp: '^SELINUX='
+    line: 'SELINUX=disabled'
+  become: true
+
+
+# Uncomment these to install system certificates
+# - name: "Install CA Certs - RedHat"
+#   command: update-ca-trust enable
+#   changed_when: no
+#   become: true
+
+# - name: "Write CRT files"
+#   copy:
+#     content: "{{ item.key }}"
+#     dest: "/etc/pki/ca-trust/source/anchors/{{ item.filename }}"
+#   loop: "{{ certs }}"
+#   become: true
+
+# - name: Refresh symlinks
+#   command: update-ca-trust extract
+#   changed_when: no
+#   become: true
+
+
+
+# Not required on Azure - RHEL comes preconfigured with RHUI repo access
+# - block:
+#   - name: "Copy RHUI rpm to server"
+#     copy:
+#       src: "files/{{ rhui_file }}"
+#       dest: "/var/tmp/{{ rhui_file }}"
+#     when: (ansible_distribution == "RedHat" and ansible_distribution_major_version == "7")
+
+#   - name: "Remove existing deprecated RHUI"
+#     yum:
+#       name: rhui-entitlement7
+#       state: absent
+#     when: (ansible_distribution == "RedHat" and ansible_distribution_major_version == "7")
+
+#   - name: "Install RHUI entitlements"
+#     yum:
+#       name: "/var/tmp/{{ rhui_file }}"
+#       state: present
+#       disable_gpg_check: yes
+#       update_cache: yes
+#     when: (ansible_distribution == "RedHat" and ansible_distribution_major_version == "7")
+#     tags: "t_rhui_install"
+#   when: rhui_server == true
+#   become: true
+
+- name: "Get runtime status of SELinux"
+  command: sestatus
+  register: se_status
+  changed_when: no
+  become: true
+
+- name: "Set SELinux to permissive until reboot"
+  command: setenforce 0
+  ignore_errors: true
+  register: selinuxenforce
+  when: "'enabled' in se_status.stdout"
+  become: true
+  
+- name: "Reboot server"
+  command: /sbin/shutdown -r +1
+  async: 0
+  poll: 0
+  ignore_errors: true
+  when: selinuxenforce.changed
+  become: true
+
+- name: "Wait for reboot"
+  wait_for_connection:
+    connect_timeout: 5
+    delay: 70
+    sleep: 10
+    timeout: 600
+  when: selinuxenforce.changed

@@ -1,0 +1,14 @@
+---
+- name: Set hostname to FQDN
+  hostname:
+    name:  "{{ inventory_hostname_short }}.{{ dns_domain }}"
+  become: true
+
+- name: Resolve self as FQDN
+  lineinfile:
+    dest: /etc/hosts
+    regexp: "^{{ ansible_default_ipv4.address }}"
+    line: "{{ ansible_default_ipv4.address }} {{ inventory_hostname_short }} {{ inventory_hostname_short }}.{{ dns_domain }}"
+    state: present
+  become: true
+

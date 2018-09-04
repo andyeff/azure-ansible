@@ -1,0 +1,21 @@
+---
+repositories_deb:
+  - name: "xenial"
+    filename: ""
+    id: ""
+    repo: "deb http://patchesubuntu/main/ubuntu/ xenial main restricted universe multiverse"
+
+  - name: "xenial-updates"
+    filename: ""
+    id: ""
+    repo: "deb http://patchesubuntu/main/ubuntu/ xenial-updates main restricted universe multiverse"
+
+  - name: "xenial-backports"
+    filename: ""
+    id: ""
+    repo: "deb http://patchesubuntu/main/ubuntu/ xenial-backports main restricted universe multiverse"
+
+  - name: "xenial-security"
+    filename: ""
+    id: ""
+    repo: "deb http://patchesubuntu/security/ubuntu xenial-security main restricted universe multiverse"

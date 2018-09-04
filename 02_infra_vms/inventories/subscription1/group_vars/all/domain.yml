@@ -1,0 +1,5 @@
+---
+dns_domain: azure.andyf.me.uk
+dns_domain_cn: "DC=azure,DC=andyf,DC=me,DC=uk"
+domain_join: false
+domain_join_user: "joinuser"

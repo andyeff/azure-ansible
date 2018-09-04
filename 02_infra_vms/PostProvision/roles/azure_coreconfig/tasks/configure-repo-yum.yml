@@ -1,0 +1,54 @@
+---
+- name: Identify repositories to install centos/redhat
+  set_fact:
+    repositories_to_install: "{{ repositories_yum|map(attribute='file')|unique|list }}"
+
+- name: Identify repositories installed.
+  find: paths="/etc/yum.repos.d" file_type=file
+  register: repositories_installed
+
+
+- name: Identify repositories installed.
+  set_fact:
+    repositories_installed: "{{ repositories_installed.files|map(attribute='path')|map('regex_replace', '.*/(.*)\\.repo', '\\1')|list }}"
+
+- name: Identify repositories to uninstall.
+  set_fact:
+    repositories_to_uninstall: "{{ repositories_installed|difference(repositories_to_install) }}"
+  when: manage_repositories
+
+- name: The following repositories will be uninstalled.
+  debug: var=repositories_to_uninstall
+  when: manage_repositories
+
+- name: Uninstall unknown repositories.
+  file: name=/etc/yum.repos.d/{{ item }}.repo state=absent
+  with_items: "{{ repositories_to_uninstall }}"
+  when: manage_repositories
+  become: true
+
+- name: "Remove Cloud repos if present"
+  file:
+    path: /etc/yum.repos.d/rh-cloud.repo
+    state: absent
+  when: rhui_server == false
+  become: true
+
+- name: "Set yum.conf exceptions"
+  template:
+    src: etc/yum.conf.j2
+    dest: /etc/yum.conf
+  become: true
+
+- name: Add known repositories.
+  yum_repository:
+    name: "{{ item.name }}"
+    file: "{{ item.file }}"
+    description: "{{ item.description }}"
+    baseurl: "{{ item.baseurl }}"
+    gpgkey: "{{ item.gpgkey | default(omit) }}"
+    gpgcheck: "{% if item.gpgkey is defined %}yes{% else %}no{% endif %}"
+    enabled: 1
+    skip_if_unavailable: yes
+  with_items: "{{ repositories_yum }}"
+  become: true

@@ -1,0 +1,181 @@
+---
+# Role tasks file
+
+# - name: Get subscription ID from credential
+#   set_fact:
+#     cred_subscription_id: "{{ lookup('env', 'AZURE_SUBSCRIPTION_ID') }}"
+#   tags: create_vm
+
+# - setup:
+#   delegate_to: localhost
+#   register: localvars
+#   run_once: true
+
+# - name: Store current date to fact
+#   set_fact:
+#     today: "{{ localvars.ansible_facts.ansible_date_time.date }}"
+#   delegate_to: localhost
+#   run_once: true
+
+# - name: Subscription ID check
+#   assert:
+#     msg: "Inventory id {{ subscription_id }} MUST match credential id {{ cred_subscription_id }}"
+#     that: (subscription_id == cred_subscription_id)  
+#   run_once: true
+#   tags: create_vm
+
+# Upload build scripts
+# Possibly not required as will host the script on a k5-accessible server
+# But good to at least get working inside Azure itself
+- name: Upload Windows buildscript
+  azure_rm_storageblob:
+    resource_group: "{{ storage_containers[0].resource_group }}"
+    storage_account_name: "{{ storage_containers[0].name }}"
+    container: "{{ storage_containers[0].container }}"
+    blob: ConfigureRemotingForAnsible.ps1
+    src: roles/build_vm/files/ConfigureRemotingForAnsible.ps1
+    content_type: 'text/plain'
+    state: present
+  delegate_to: localhost
+  run_once: true
+
+
+# Optional step
+- name: Create public ip
+  azure_rm_publicipaddress:
+    resource_group: "{{ vm_resgroup }}"
+    allocation_method: Static
+    name: "{{ inventory_hostname }}_ip"
+  delegate_to: localhost
+  when: (needs_public_ip is defined) and (needs_public_ip == True)
+  register: pub_ip
+  tags: create_vm
+
+- name: Store public ip name
+  set_fact:
+    public_ip_name: "{{ pub_ip.state.name }}"
+  when: (pub_ip.state is defined) and ( pub_ip.state.name is defined)
+  tags: create_vm
+  
+- name: Store public ip address
+  set_fact:
+    public_ip_address: "{{ pub_ip.state.ip_address }}"
+  when: (pub_ip.state is defined) and ( pub_ip.state.ip_address is defined)
+  tags: create_vm
+
+- name: Create NIC
+  azure_rm_networkinterface:
+    resource_group: "{{ vm_resgroup }}"
+    name: "{{ inventory_hostname }}_nic"
+    virtual_network: "{{ vm_vnet }}"
+    subnet: "{{ vm_subnet }}"
+    ip_configurations:
+      - name: ipconfig1
+        private_ip_address: "{{ ansible_host }}"
+        public_ip_address_name: "{{ public_ip_name | default('') }}"
+        private_ip_allocation_method: Static
+        primary: true
+    security_group: "{{ nic_sg | default('') }}"
+  delegate_to: localhost
+  tags: create_vm
+
+- name: Create VM
+  azure_rm_virtualmachine:
+    resource_group: "{{ vm_resgroup }}"
+    name: "{{ inventory_hostname }}"
+    vm_size: "{{ vm_size }}"
+    managed_disk_type: "{{ managed_disk_type }}"
+    admin_username: "{{ admin_username }}"
+    admin_password: "{{ admin_password }}"
+    ssh_public_keys: "{% if image.os_type != 'Windows' %}{{ public_key }}{% else %}{{ omit }}{% endif %}"
+    os_type: "{{ image.os_type }}"
+    data_disks: "{{ disks | default(omit) }}"
+    network_interface_names: "{{ inventory_hostname }}_nic"
+    image:
+      offer: "{{ image.offer }}"
+      publisher: "{{ image.publisher }}"
+      sku: "{{ image.sku }}"
+      version: "{{ image.version }}"
+    # custom_data: "{% if userdata is defined %}{{ userdata }}{% else %}{{ userdata | default(omit) }}{% endif %}"
+    tags: "{{ tags }}"
+    append_tags: true
+  delegate_to: localhost
+  register: create_res
+  tags: create_vm
+
+- name: Extract provisioned date from return value
+  set_fact:
+    parsed_date: "{{ create_res | json_query('ansible_facts.azure_vm.properties.instanceView.statuses[].time | [0]') }}"
+  tags: create_vm
+
+- name: Store provisioning date as formatted tag dict
+  set_fact:
+    provision_tag:
+      created_on: "{{ parsed_date[0:10] }}"
+  tags: create_vm
+
+- name: Merge tags for ansible append_tags bug workaround
+  set_fact:
+    newtags: "{{ tags | combine(provision_tag) }}"
+
+- name: Apply Create tag if missing
+  azure_rm_virtualmachine:
+    resource_group: "{{ vm_resgroup }}"
+    name: "{{ inventory_hostname }}"
+    append_tags: true
+    tags: "{{ newtags }}"
+  delegate_to: localhost
+  when: not create_res | json_query('ansible_facts.azure_vm.tags.created_on')
+  tags: create_vm
+
+- name: Apply Linux custom script extension for userdata
+  azure_rm_virtualmachine_extension:
+    name: applyLinuxUserdata
+    resource_group: "{{ vm_resgroup }}"
+    virtual_machine_name: "{{ inventory_hostname }}"
+    publisher: Microsoft.Azure.Extensions
+    virtual_machine_extension_type: CustomScript
+    type_handler_version: 2.0
+    settings: '{"script": "IyEvYmluL2Jhc2gKc2V0IC1ldWYgLW8gcGlwZWZhaWwKZXhlYyAxPiA+KGxvZ2dlciAtcyAtdCAkKGJhc2VuYW1lICQwKSkgMj4mMQpjYXQ+Pi9ldGMvc3Vkb2Vycy5kLzk1LWFuc2libGUtcGlwZWxpbmluZzw8RU9GCiMKIyBFbmFibGUgcGlwZWxpbmluZyBtb2RlIGFuZCBzdWRvIGF2YWlsYWJpbGl0eSBmb3IgQW5zaWJsZQojCkRlZmF1bHRzOmxvY2FsYWRtICAgICFyZXF1aXJldHR5CkVPRgpjaG1vZCA0NDAgL2V0Yy9zdWRvZXJzLmQvOTUtYW5zaWJsZS1waXBlbGluaW5nCmVjaG8gIlVzZXJkYXRhIGRvbmUiCgo="}'
+    auto_upgrade_minor_version: true
+  delegate_to: localhost
+  when: "'redhat' in group_names or 'ubuntu' in group_names"
+
+- name: Configure WinRM script url
+  set_fact:
+    configure_remoting_script: "https://{{ storage_accounts[0]['name'] }}.blob.core.windows.net/{{ storage_containers[0].container }}/ConfigureRemotingForAnsible.ps1"
+
+- name: Apply WinRM custom script extension for Windows
+  azure_rm_virtualmachine_extension:
+    name: configureWinRM
+    resource_group: "{{ vm_resgroup }}"
+    virtual_machine_name: "{{ inventory_hostname }}"
+    publisher: Microsoft.Compute
+    virtual_machine_extension_type: CustomScriptExtension
+    type_handler_version: 1.9
+    # settings: '{"fileUris":["https://raw.githubusercontent.com/ansible/ansible/stable-2.6/examples/scripts/ConfigureRemotingForAnsible.ps1"],"commandToExecute":"powershell.exe -ExecutionPolicy ByPass -File ./ConfigureRemotingForAnsible.ps1 -ForceNewSSLCert -EnableCredSSP -SkipNetworkProfileCheck -CertValidityDays 3650"}'
+    settings: '{"fileUris":["{{ configure_remoting_script }}"],"commandToExecute":"powershell.exe -ExecutionPolicy ByPass -File ./ConfigureRemotingForAnsible.ps1 -ForceNewSSLCert -EnableCredSSP -SkipNetworkProfileCheck -CertValidityDays 3650"}'
+    auto_upgrade_minor_version: true
+  delegate_to: localhost
+  when: "'windows' in group_names"
+# https://storagef263e6e374e24456.blob.core.windows.net/buildscripts/ConfigureRemotingForAnsible.ps1
+
+
+- debug:
+    msg: "server public ip is {{ public_ip_address }}"
+  when: public_ip_address is defined
+  tags: create_vm
+
+- set_fact:
+    ansible_host: "{{ ansible_facts.azure_vm.properties.networkProfile.networkInterfaces[0].properties.ipConfigurations[0].properties.publicIPAddress.properties.ipAddress }}"
+  when: (needs_public_ip is defined) and (needs_public_ip == True)
+  register: api_public_ip
+  tags: create_vm
+
+- name: "Wait for server to become reachable"
+  wait_for_connection:
+    connect_timeout: 5
+    delay: 5
+    sleep: 10
+    timeout: 600
+  tags: create_vm

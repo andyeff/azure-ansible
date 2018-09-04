@@ -1,0 +1,73 @@
+---
+
+security_groups_subnet:
+  - name: SN_AllowHome
+    resource_group: "{{ resource_groups[0]['name'] }}"
+    purge_existing: yes
+    rules:
+      - name: AndyAllowAll
+        access: Allow
+        priority: 200
+        direction: Inbound
+        source_address_prefix:
+          - '212.159.32.0/19'
+      - name: AllowSSHFujitsu
+        protocol: Tcp
+        destination_port_range: 22
+        access: Allow
+        priority: 300
+        direction: Inbound
+        source_address_prefix:
+          - '62.60.0.0/17'
+      - name: AllowWinRMFujitsu
+        protocol: Tcp
+        destination_port_range: 5985-5986
+        access: Allow
+        priority: 400
+        direction: Inbound
+        source_address_prefix:
+          - '62.60.0.0/17'
+      # - name: AllowRDPFujitsu
+      #   protocol: Tcp
+      #   destination_port_range: 3389
+      #   access: Allow
+      #   priority: 500
+      #   direction: Inbound
+      #   source_address_prefix:
+      #     - '62.60.0.0/17'
+      # - name: DenySSH
+      #   protocol: Tcp
+      #   destination_port_range: 22
+      #   access: Deny
+      #   priority: 120
+      #   direction: Inbound
+
+security_groups_hosts:
+  - name: H_AllowAll
+    purge_existing: yes
+    resource_group: "{{ resource_groups[0]['name'] }}"
+    rules:
+      - name: PermitAny
+        access: Allow
+        priority: 200
+        direction: Inbound
+      # - name: PermitInternal
+      #   source_address_prefix: VirtualNetwork
+      #   access: Allow
+      #   priority: 110
+      #   direction: Inbound
+
+  - name: H_DenyTelnet
+    purge_existing: yes
+    resource_group: "{{ resource_groups[0]['name'] }}"
+    rules:
+      - name: BlockTelnet
+        protocol: Tcp
+        destination_port_range: 23
+        access: Deny
+        priority: 100
+        direction: Inbound
+      - name: PermitAny
+        access: Allow
+        priority: 200
+        direction: Inbound

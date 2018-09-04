@@ -1,0 +1,7 @@
+---
+admin_username: localadm
+keyfile_path: "/home/{{ admin_username }}/.ssh/authorized_keys"
+
+public_key:
+  - path: "{{ keyfile_path }}"
+    key_data: 'ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEAzMnQhzDhRTWXiPh0whX/zKfYMvFl9AzHLXvH+b1QH9IZoyUQVMws/hFxGj3056dBka6acgCGPnmbY9hgGzD+vkroVZj3sAeQRzscVH1JZ/tcAzH+S25kbJ9BH8qoeirUWkLqcw2OL2Rj4a7D0ksx2Fz7NVDeJ1XlchtQf8LyZQ7Li8I6pgUKUMUEAIsmlBFyuMfap9L+TORBWOjZuOBP8bO3jOJEV1B4FOEis6noQfwtet4JsOh4ogMwPaQImUOixhaKZf4QQ2NKLD2JwI5146uh8FfhDJOidf/ZFJnn8gqZsWB3RC7sbe8CJAOZrFLvuxMZuMtkg1rqk57l7TcPPw== dev-only'

@@ -1,0 +1,38 @@
+---
+- name: Create partition
+  parted:
+    device: "{{ item.device }}"
+    number: 1
+    state: present
+  with_items: "{{ disks }}"
+  become: true
+  tags: mount_disks
+
+- name: Make file system
+  filesystem:
+    fstype: "{{ item.fs | default('ext4') }}"
+    dev: "{{ item.device }}1"
+    opts: "{% if item.fs | default('xfs') == 'ext4' %}-m 0{% else %}{{ omit }}{% endif %}"
+  with_items: "{{ disks }}"
+  become: true
+  tags: mount_disks
+
+- name: Get UUID for partition
+  command: blkid -s UUID -o value {{ item.device }}1
+  register: disk_blkid
+  with_items: "{{ disks }}"
+  changed_when: False
+  become: true
+  tags: mount_disks
+
+- name: Mount
+  mount:
+    path: "{{ item.0.mountpoint }}"
+    src: "UUID={{ item.1.stdout_lines[0] }}"
+    fstype: "{{ item.0.fs | default('ext4') }}"
+    state: mounted
+  with_together:
+    - "{{ disks }}"
+    - "{{ disk_blkid.results }}"
+  become: true
+  tags: mount_disks

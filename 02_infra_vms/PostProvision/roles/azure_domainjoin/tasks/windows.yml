@@ -1,0 +1,18 @@
+---
+- name: "Join domain - normal preprod"
+  win_domain_membership:
+    dns_domain_name: "{{ dns_domain }}"
+    domain_admin_user: "{{ domain_join_user }}"
+    domain_admin_password: "{{ domain_join_password }}"
+    domain_ou_path: "{{ domain_ou_path }}"
+    state: domain
+  register: domainjoin
+
+- name: Reboot windows if required
+  win_reboot:
+  async: 0
+  poll: 0
+  when:
+    - domainjoin is defined
+    - domainjoin.reboot_required is defined
+    - domainjoin.reboot_required

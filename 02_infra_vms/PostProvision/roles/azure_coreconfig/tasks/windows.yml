@@ -1,0 +1,149 @@
+---
+- name: "Set UK timezone"
+  win_timezone:
+    timezone: GMT Standard Time
+
+- name: "Set UK region"
+  win_region:
+    format: "{{ win_os_locale }}"
+    location: "{{ win_os_locale_geoid }}"
+    unicode_language: "{{ win_os_locale }}"
+    copy_settings: True
+  register: regionset
+
+- name: "Copy NTP installer"
+  win_copy:
+    src: files/win-ntp/
+    dest: c:\temp\win-ntp\
+
+- name: Check for existing NTP install
+  win_stat:
+    path: 'C:\Program Files (x86)\NTP\etc'
+  register: ntp_installed
+
+- name: "Copy NTP conf if already installed"
+  win_template:
+    src: windows/ntp.conf.j2
+    dest: 'C:\Program Files (x86)\NTP\etc\ntp.conf'
+  when: ntp_installed.stat is defined and ntp_installed.stat.exists
+
+- name: "Copy NTP conf template"
+  win_template:
+    src: windows/ntp.conf.j2
+    dest: c:\temp\win-ntp\ntp.conf
+
+- name: "Install NTP agent"
+  win_package:
+    path: c:\temp\win-ntp\ntp-setup.exe
+    product_id: 'NTP'
+    arguments: /USEFILE=c:\temp\win-ntp\NTPinstall.ini
+    expected_return_code: [0, 2, 3010]
+    state: present
+
+- name: "Reconfigure NTP service binpath"
+  win_service:
+    name: NTP
+    path: '"C:\Program Files (x86)\NTP\bin\ntpd.exe" -U 3 -M -g -c "C:\Program Files (x86)\NTP\etc\ntp.conf"'
+    state: restarted
+
+## Uncomment these to install system certificates
+# - name: "Copy Certs"
+#   win_copy:
+#     src: "files/certs/{{ env }}/"
+#     dest: c:\temp\ssl-certs\
+
+# - name: "Get list of available certs"
+#   win_find:
+#     paths: c:\temp\ssl-certs
+#     patterns: ['*.crt']
+#   register: certlist
+
+# - name: "Install any Root CA certs"
+#   win_certificate_store:
+#     file_type: pem
+#     key_storage: machine
+#     path: "{{ item.path }}"
+#     state: present
+#     store_location: LocalMachine
+#     store_name: AuthRoot
+#   loop: "{{ certlist.files }}"
+#   when: item.filename | regex_search('^root')
+
+# - name: "Install any Sub CA certs"
+#   win_certificate_store:
+#     file_type: pem
+#     key_storage: machine
+#     path: "{{ item.path }}"
+#     state: present
+#     store_location: LocalMachine
+#     store_name: CertificateAuthority
+#   loop: "{{ certlist.files }}"
+#   when: item.filename | regex_search('^sub')
+
+# - name: "Install any other certs"
+#   win_certificate_store:
+#     file_type: pem
+#     key_storage: machine
+#     path: "{{ item.path }}"
+#     state: present
+#     store_location: LocalMachine
+#     store_name: AuthRoot
+#   loop: "{{ certlist.files }}"
+#   when: not item.filename | regex_search('^root') and not item.filename | regex_search('^sub')
+
+
+## Uncomment these if system locale needs changing from VM defaults
+# - name: "Copy Locale registry files"
+#   win_copy:
+#     src: files/win-locale/
+#     dest: c:\temp\locale\
+
+# - name: "Set locale"
+#   win_shell: |
+#     $DefaultHKEY = "HKU\DEFAULT_USER"
+#     $DefaultRegPath = "C:\Users\Default\NTUSER.DAT"
+#     Set-Culture {{ win_os_locale }}
+#     Set-WinSystemLocale {{ win_os_locale }}
+#     Set-WinHomeLocation -GeoId {{ win_os_locale_geoid }}
+#     Set-WinUserLanguageList {{ win_os_locale }} -force
+#     reg load $DefaultHKEY $DefaultRegPath
+#     reg import "c:\temp\locale\locale-default.reg"
+#     reg unload $DefaultHKEY
+#     reg import "c:\temp\locale\locale-welcome.reg"
+#   register: locale_set
+
+# - name: "Configure {{ win_os_locale }} System Locale"
+#   win_shell: "Set-WinSystemLocale -SystemLocale {{ win_os_locale }}"
+
+- name: Disable 3DES
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Ciphers\Triple DES 168
+    name: Enabled
+    data: 0
+    type: dword
+    state: present
+  register: threedes_disabled
+
+- name: Disable TLS 1.0 Server
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server
+    name: Enabled
+    data: 0
+    type: dword
+    state: present
+  register: tls10server_disable
+
+- name: Disable TLS 1.0 Client
+  win_regedit:
+    path: HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Client
+    name: Enabled
+    data: 0
+    type: dword
+    state: present
+  register: tls10client_disable
+
+- name: Enable credssp for WinRM
+  win_shell: enable-wsmancredssp -Role server -Force
+
+- win_reboot:
+  when: regionset.restart_required or threedes_disabled.changed or tls10server_disable.changed or tls10client_disable.changed

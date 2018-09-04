@@ -1,0 +1,52 @@
+---
+# tasks file for Ubuntu1604-CIS
+- name: Check OS distro
+  fail:
+    msg: "OS is not Ubuntu, failing"
+  when: ansible_os_family != 'Debian'
+
+- name: Check OS version
+  fail:
+    msg: "Ubuntu version is not 16.xx, failing"
+  when: ansible_distribution_major_version is version_compare('16', '!=')
+
+- name: Check ansible version
+  fail:
+    msg: You must use ansible 2.1 or greater
+  when: ansible_version.full is not version_compare('2.1', '>=')
+
+- include: prelim.yml
+  become: yes
+  tags:
+      - prelim_tasks
+
+- include: section1.yml
+  become: yes
+  when: ubuntu1604cis_section1
+
+- include: section2.yml
+  become: yes
+  when: ubuntu1604cis_section2
+
+- include: section3.yml
+  become: yes
+  when: ubuntu1604cis_section3
+
+- include: section4.yml
+  become: yes
+  when: ubuntu1604cis_section4
+
+- include: section5.yml
+  become: yes
+  when: ubuntu1604cis_section5
+
+- include: section6.yml
+  become: yes
+  when: ubuntu1604cis_section6
+
+## Currently no post tasks needed
+# - include: post.yml
+#   become: yes
+#   tags:
+#       - post_tasks
+#       - always

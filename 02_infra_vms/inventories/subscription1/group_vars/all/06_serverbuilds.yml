@@ -1,0 +1,11 @@
+---
+# If true, servers in inventory will be built UNLESS specific group/host var overrules e.g. for localhost
+buildserver: True
+env: "preprod"
+#k5_coreconfig
+tz_region: Europe
+tz_city: London
+ntp_servers:
+  - time.google.com
+# Don't delete any additional repos in case they were added by an app/service or something
+manage_repositories: false

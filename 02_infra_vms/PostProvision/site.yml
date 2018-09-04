@@ -1,0 +1,62 @@
+---
+- name: "Post-Provisioning actions"
+  hosts: all
+  gather_facts: no
+  tasks:
+
+    # Hosts file role only for servers that can't use DNS
+    # - name: "Hostsfile config"
+    #   import_role:
+    #     name: k5_hosts
+    #   tags: hosts
+    #   when: (needshosts is defined) and (needshosts == True)
+
+    - name: "Core config"
+      import_role:
+        name: azure_coreconfig
+      tags: coreconfig
+
+- name: "Security Hardening for RHEL"
+  hosts: redhat
+  gather_facts: yes
+  tasks:
+    - name: "RHEL hardening"
+      import_role:
+        name: cisrhel
+      tags: cisrhel
+      when: ansible_os_family | lower == 'redhat'
+
+- name: "Security Hardening for Ubuntu"
+  hosts: ubuntu
+  gather_facts: yes
+  tasks:
+    - name: "Ubuntu hardening"
+      import_role:
+        name: cisubuntu
+      tags: cisubuntu
+      when: ansible_os_family | lower == 'debian'
+
+- name: "Security Hardening for Windows"
+  hosts: windows
+  gather_facts: yes
+  tasks:
+    - name: "Windows hardening"
+      import_role:
+        name: ciswindows
+      tags: ciswindows
+      when: ansible_os_family | lower == 'windows'
+
+- name: "Post-hardening tasks and domain join"
+  hosts: all
+  gather_facts: yes
+  tasks:
+    - name: "post_harden"
+      import_role:
+        name: azure_postconfig
+      tags: postconfig
+
+    # - name: "Domain Join"
+    #   import_role:
+    #     name: azure_domainjoin
+    #   tags: domainjoin
+    #   when: domain_join == True

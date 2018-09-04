@@ -1,0 +1,6 @@
+---
+- name: Configure Linux logs directory
+  file:
+    path: /opt/sysmgt/logs
+    state: directory
+  become: true

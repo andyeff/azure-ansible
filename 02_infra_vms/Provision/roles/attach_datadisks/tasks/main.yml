@@ -1,0 +1,20 @@
+---
+- name: Check for Public IP
+  azure_rm_publicipaddress_facts:
+    resource_group: 'andytest'
+    name: "{{ inventory_hostname }}_ip"
+  delegate_to: localhost
+  register: pub_ip
+  when: (needs_public_ip is defined) and (needs_public_ip == True)
+
+- name: Override ansible_host with public IP
+  set_fact:
+    ansible_host: "{{ pub_ip.ansible_facts.azure_publicipaddresses[0].properties.ipAddress }}"
+  when: (needs_public_ip is defined) and (needs_public_ip == True)
+
+- name: Obtain server facts
+  setup:
+
+- name: Run OS-specific tasks
+  include_tasks: "{{ ansible_os_family | lower }}.yml"
+  when: disks is defined

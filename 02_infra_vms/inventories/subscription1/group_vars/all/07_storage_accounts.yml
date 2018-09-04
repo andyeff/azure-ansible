@@ -1,0 +1,15 @@
+---
+
+sub_hash: "{{ subscription_id | hash('md5') }}"
+
+storage_accounts: 
+  - name: "storage{{ sub_hash[0:16] }}"
+    resource_group: "{{ resource_groups[0]['name'] }}"
+    type: Standard_LRS
+    kind: Storage
+
+storage_containers:
+  - name: "{{ storage_accounts[0]['name'] }}"
+    resource_group: "{{ resource_groups[0]['name'] }}"
+    container: buildscripts
+    access: blob

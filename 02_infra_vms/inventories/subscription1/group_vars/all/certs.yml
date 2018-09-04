@@ -1,0 +1,25 @@
+---
+# Example certs go here
+certs:
+  - name: "domain-root"
+    filename: "X-CA-root.crt"
+    key: |
+      -----BEGIN CERTIFICATE-----
+      blah
+      -----END CERTIFICATE-----
+
+  - name: "domain-sub"
+    filename: "X-CA-sub.crt"
+    key: |
+      -----BEGIN CERTIFICATE-----
+      blah
+      -----END CERTIFICATE-----
+
+  - name: "proxy"
+    filename: "proxy.crt"
+    key: |
+      -----BEGIN CERTIFICATE-----
+      blah
+      -----END CERTIFICATE-----
+
+

@@ -1,0 +1,61 @@
+---
+- name: changing nofiles (hard)
+  pam_limits:
+    domain: '*'
+    limit_item: nofile
+    limit_type: hard
+    value: 65535
+  become: true
+
+- name: changing nofiles (soft)
+  pam_limits:
+    domain: '*'
+    limit_item: nofile
+    limit_type: soft
+    value: 65535
+  become: true
+
+- name: changing nproc (hard)
+  pam_limits:
+    domain: '*'
+    limit_item: nproc
+    limit_type: hard
+    value: 65535
+  become: true
+
+- name: changing nproc (soft)
+  pam_limits:
+    domain: '*'
+    limit_item: nproc
+    limit_type: soft
+    value: 65535
+  become: true
+
+- name: remove erroneous domain nofile setting
+  lineinfile:
+    path: /etc/security/limits.conf
+    regexp: '^\* - nofile 16384'
+    state: absent
+  become: true
+
+- name: Disable Transparent Huge Pages
+  copy:
+    src: disable-thp.service
+    dest: /etc/systemd/system/disable-thp.service
+  become: true
+
+- name: Activate Disable THP service
+  systemd:
+    daemon_reload: yes
+    name: disable-thp
+    enabled: yes
+    state: started
+  become: true
+
+- name: "Enable ssh authentication with passwords"
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: "^PasswordAuthentication"
+    line: "PasswordAuthentication yes"
+  become: true
+  notify: restart sshd

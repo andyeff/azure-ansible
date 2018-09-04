@@ -1,0 +1,11 @@
+---
+- name: Build infrastructure
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+
+  - name: "Role: Build infra components"
+    import_role:
+      name: build_core_infra
+

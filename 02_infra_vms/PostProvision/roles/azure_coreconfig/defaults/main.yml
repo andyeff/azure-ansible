@@ -1,0 +1,38 @@
+---
+# OS locale and TZ info
+tz_region: Europe
+tz_city: London
+os_locale: en_GB.UTF-8
+dns_domain: azure.mycompany.com
+
+manage_repositories: false
+
+repositories_deb:
+  - name: "xenial"
+    filename: ""
+    id: ""
+    repo: "deb http://patchubuntu/main/ubuntu/ xenial main restricted universe multiverse"
+
+  - name: "xenial-updates"
+    filename: ""
+    id: ""
+    repo: "deb http://patchubuntu/main/ubuntu/ xenial-updates main restricted universe multiverse"
+
+  - name: "xenial-backports"
+    filename: ""
+    id: ""
+    repo: "deb http://patchubuntu/main/ubuntu/ xenial-backports main restricted universe multiverse"
+
+  - name: "xenial-security"
+    filename: ""
+    id: ""
+    repo: "deb http://patchubuntu/security/ubuntu xenial-security main restricted universe multiverse"
+
+repositories_deb_keys:
+
+rhui_file: "client-rhel7-3.0-1.noarch.rpm"
+rhui_server: false
+
+# Windows vars
+win_os_locale: en-GB
+win_os_locale_geoid: 242

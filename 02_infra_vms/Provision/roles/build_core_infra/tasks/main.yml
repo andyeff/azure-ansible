@@ -1,0 +1,70 @@
+---
+# Role tasks file
+
+# Enable this and matching variable in Inventory to control whether this is running in the right place
+# - name: Get subscription ID from credential
+#   set_fact:
+#     cred_subscription_id: "{{ lookup('env', 'AZURE_SUBSCRIPTION_ID') }}"
+
+# Enable this and matching variable in Inventory to control whether this is running in the right place
+# - name: Subscription ID check
+#   assert:
+#     msg: "Inventory id {{ subscription_id }} MUST match credential id {{ cred_subscription_id }}"
+#     that: (subscription_id == cred_subscription_id)  
+
+- name: Create Resource Group
+  azure_rm_resourcegroup:
+    name: "{{ item.name }}"
+    location: "{{ item.location }}"
+  loop: "{{ resource_groups }}"
+  tags: create_infra_rg
+
+- set_fact:
+    secgroup_merge: "{{ security_groups_subnet }} + {{ security_groups_hosts }}"
+  tags: create_infra_sg
+
+- name: Create Security Groups
+  azure_rm_securitygroup:
+    name: "{{ item.name }}"
+    resource_group: "{{ item.resource_group }}"
+    purge_rules: "{{ purge_existing | default('yes') }}"
+    rules: "{{ item.rules }}"
+  loop: "{{ secgroup_merge }}"
+  tags: create_infra_sg
+
+- name: Create Virtual Networks
+  azure_rm_virtualnetwork:
+    name: "{{ item.name }}"
+    resource_group: "{{ item.resource_group }}"
+    address_prefixes_cidr: "{{ item.ip_cidr }}"
+  loop: "{{ virtual_networks }}"
+  tags: create_infra_vn
+
+- name: Create Subnets
+  azure_rm_subnet:
+    name: "{{ item.name }}"
+    resource_group: "{{ item.resource_group }}"
+    address_prefix_cidr: "{{ item.ip_cidr }}"
+    virtual_network_name: "{{ item.vnet }}"
+    security_group: "{{ item.sg | default(omit) }}"
+  loop: "{{ subnets }}"
+  tags: create_infra_sn
+
+- name: Create storage account
+  azure_rm_storageaccount:
+    name: "{{ item.name }}"
+    resource_group: "{{ item.resource_group }}"
+    type: "{{ item.type }}"
+    kind: "{{ item.kind }}"
+    access_tier: "{{ item.tier | default(omit) }}"
+    state: present
+  loop: "{{ storage_accounts }}"
+  tags: create_infra_storage
+
+- name: Create storage container
+  azure_rm_storageblob:
+    resource_group: "{{ item.resource_group }}"
+    storage_account_name: "{{ item.name }}"
+    container: "{{ item.container }}"
+    public_access: "{{ item.access }}"
+  loop: "{{ storage_containers }}"

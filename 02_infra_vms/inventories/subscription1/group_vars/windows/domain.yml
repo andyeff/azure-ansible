@@ -1,0 +1,3 @@
+---
+domain_ou_path: "OU=W2k12-Servers,OU=Windows Servers,OU=Servers,OU=K5 Cloud,{{ dns_domain_cn }}"
+domain_join_user: "autobld@{{ dns_domain }}"

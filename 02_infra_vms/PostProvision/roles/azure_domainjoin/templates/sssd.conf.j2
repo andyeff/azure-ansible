@@ -1,0 +1,64 @@
+# {{ ansible_managed }}
+{% set dc = dns_domain.split('.')[0] %}
+[sssd]
+config_file_version = 2
+services = nss, pam, sudo
+domains = default
+[nss]
+[pam]
+[domain/default]
+debug_level=1
+enumerate = true
+
+#
+#
+# ID search based on LDAP searces
+# Authentication and password changes based on kerberos
+#
+
+id_provider = ldap
+chpass_provider = krb5
+auth_provider = krb5
+sudo_provider = ldap
+ldap_sudo_search_base = ou=sudoers,dc={{ dc }},dc=internal,dc=horizonng,dc=com
+krb5_server = {{ ad_dc }}.{{ dns_domain }}
+krb5_realm = {{ dns_domain | upper }}
+krb5_kpasswd = {{ ad_dc }}.{{ dns_domain }}
+krb5_ccachedir = /tmp
+krb5_auth_timeout = 15
+cache_credentials = true
+ldap_server = {{ ad_dc }}.{{ dns_domain }}
+ldap_uri = ldap://{{ ad_dc }}.{{ dns_domain }}
+ldap_tls_cacertdir = /etc/openldap/cacerts
+ldap_search_base = dc={{ dc }},dc=internal,dc=horizonng,dc=com
+ldap_id_use_start_tls = false
+ldap_tls_reqcert = demand
+ldap_user_search_base = dc={{ dc }},dc=internal,dc=horizonng,dc=com
+ldap_group_search_base = dc={{ dc }},dc=internal,dc=horizonng,dc=com
+ldap_schema = rfc2307bis
+ldap_sasl_mech = GSSAPI
+ldap_force_upper_case_realm = true
+ldap_krb5_keytab = /etc/krb5.keytab
+ldap_referrals = false
+ldap_user_object_class = person
+ldap_user_modify_timestamp = whenChanged
+ldap_user_home_directory = unixHomeDirectory
+ldap_user_shell = loginShell
+ldap_user_principal = userPrincipalName
+ldap_user_name = sAMAccountName
+ldap_user_uid_number = uidNumber
+ldap_user_gid_number = gidNumber
+ldap_user_home_directory = unixHomeDirectory
+ldap_user_shell = loginShell
+ldap_user_principal = userPrincipalName
+ldap_group_object_class = group
+ldap_group_modify_timestamp = whenChanged
+ldap_group_object_class = group
+ldap_group_name = sAMAccountName
+ldap_group_gid_number = gidNumber
+ldap_force_upper_case_realm = True
+ldap_sudo_full_refresh_interval=86400
+ldap_sudo_smart_refresh_interval=3600
+entry_cache_timeout = 3600
+override_shell=/bin/bash
+[sudo]

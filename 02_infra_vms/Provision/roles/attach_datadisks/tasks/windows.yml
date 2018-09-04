@@ -1,0 +1,17 @@
+---
+# - name: "Format and partition extra disks"
+#   win_shell: |
+#     $disk = Get-Disk | ? {$_.SerialNumber -eq "{{ item.0[0:20]}}" -and $_.PartitionStyle -eq 'RAW'}
+#     $disk | Initialize-Disk -PartitionStyle MBR -PassThru | New-Partition -DriveLetter "{{ item.1.mountpoint }}" -UseMaximumSize | Format-Volume -FileSystem NTFS -Confirm:$false
+#   with_together:
+#     - "{{ vol_id_list }}"
+#     - "{{ disks }}"
+
+- name: "Format and partition extra disks"
+  win_shell: |
+    $disk = Get-Disk | ? {$_.Number -eq "{{ index + 2 }}" -and $_.PartitionStyle -eq 'RAW'}
+    $disk | Initialize-Disk -PartitionStyle MBR -PassThru | New-Partition -DriveLetter "{{ item.mountpoint }}" -UseMaximumSize | Format-Volume -FileSystem NTFS -Confirm:$false
+  loop: "{{ disks|flatten(levels=1) }}"
+  loop_control:
+    index_var: index
+  tags: mount_disks

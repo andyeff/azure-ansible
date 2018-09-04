@@ -1,0 +1,21 @@
+---
+- name: "Enable dhclient domain-search supersede"
+  lineinfile:
+    path: /etc/dhcp/dhclient.conf
+    line: 'supersede domain-search "{{ dns_domain }}";'
+    state: present
+    create: yes
+  become: true
+
+- name: "Enable dhclient domain-name supersede"
+  lineinfile:
+    path: /etc/dhcp/dhclient.conf
+    line: 'supersede domain-name "{{ dns_domain }}";'
+    state: present
+    create: yes
+  become: true
+
+- name: restart-dhclient
+  shell: 'dhclient -x ; dhclient'
+  changed_when: false
+  become: true

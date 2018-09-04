@@ -1,0 +1,59 @@
+---
+# Set timezone
+- name: Set timezone
+  timezone:
+    name: "{{ tz_region }}/{{ tz_city }}"
+  become: true
+
+# Set locale
+- name: install the locales package
+  apt:
+    pkg: locales
+    state: latest
+    update_cache: yes
+  become: true
+
+- name: check the locale
+  command: localectl status
+  register: command_result
+  changed_when: false
+
+- name: ensure the locale exists
+  command: /usr/sbin/locale-gen "{{ os_locale }}"
+  when: os_locale not in command_result.stdout
+  become: true
+
+- name: set the locale
+  command: /usr/sbin/update-locale "LANG={{ os_locale }}" --reset
+  when: os_locale not in command_result.stdout
+  become: true
+
+- name: "Configure timesyncd network time daemon"
+  template:
+    src: etc/timesyncd.conf.j2
+    dest: /etc/systemd/timesyncd.conf
+    owner: root
+    group: root
+    mode: 0644
+  register: ntpdconf    
+  become: true
+
+- name: "Restart NTP ubuntu"
+  systemd:
+    name: systemd-timesyncd
+    state: restarted
+  when: ntpdconf.changed
+  become: true
+
+# Uncomment these to install system certificates
+# - name: "Install CA Certs"
+#   copy:
+#     content: "{{ item.key }}"
+#     dest: "/usr/local/share/ca-certificates/{{ item.filename }}"
+#   loop: "{{ certs }}"
+#   become: true
+
+# - name: "Update CA cert symlinks"
+#   command: update-ca-certificates --fresh
+#   changed_when: no
+#   become: true

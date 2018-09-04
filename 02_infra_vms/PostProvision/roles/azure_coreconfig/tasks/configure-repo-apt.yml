@@ -1,0 +1,52 @@
+---
+- name: Identify repositories to install ubuntu/debian
+  set_fact:
+    repositories_to_install: "{{ repositories_deb|map(attribute='name')|unique|list }}"
+
+- name: Identify repositories installed.
+  find: paths="/etc/apt/sources.list.d" file_type=file
+  register: repositories_installed
+
+- name: Identify repositories installed.
+  set_fact:
+    repositories_installed: "{{ repositories_installed.files|map(attribute='path')|map('regex_replace', '.*/(.*)\\.list', '\\1')|list }}"
+
+- name: Identify repositories to uninstall.
+  set_fact:
+    repositories_to_uninstall: "{{ repositories_installed|difference(repositories_to_install) }}"
+
+- name: Identify repositories to install.
+  set_fact:
+    new_repositories_to_install: "{{ repositories_to_install|difference(repositories_installed) }}"
+
+- name: remove repository from sources list.
+  apt_repository:
+    repo: "{{ item.repo }}"
+    state: absent
+  with_items: "{{ repositories_to_uninstall }}"
+  when: manage_repositories
+  become: true
+
+- name: Copy gpg keys
+  copy:
+    content: "{{ repositories_deb_keys[item.name].key }}"
+    dest: "/tmp/{{ item.name }}.gpg"
+  with_items: "{{ repositories_deb }}"
+  when: repositories_deb_keys[item.name] is defined
+  become: true
+
+- name: Add gpg keys from file
+  apt_key:
+    id:    "{{ item.id }}"
+    file: "/tmp/{{ item.name }}.gpg"
+  with_items: "{{ repositories_deb }}"
+  when: repositories_deb_keys[item.name] is defined
+  become: true
+
+- name: Add repository into sources list using specified filename.
+  apt_repository:
+    filename: "{{ item.name }}"
+    repo: "{{ item.repo }}"
+    state: present
+  with_items: "{{ repositories_deb }}"
+  become: true

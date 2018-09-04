@@ -1,0 +1,12 @@
+---
+
+virtual_networks:
+  - name: vnet1
+    resource_group: "{{ resource_groups[0]['name'] }}"
+    ip_cidr:
+      - "10.10.0.0/16"
+
+  - name: vnet2
+    resource_group: "{{ resource_groups[0]['name'] }}"
+    ip_cidr:
+      - "10.20.0.0/16"

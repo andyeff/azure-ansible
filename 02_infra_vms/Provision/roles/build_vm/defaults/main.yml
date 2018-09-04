@@ -1,0 +1,31 @@
+---
+# Role defaults file
+
+vm_resgroup: "{{ resource_groups[0]['name'] }}"
+vm_vnet: "{{ virtual_networks[0]['name'] }}"
+vm_subnet: "{{ subnets[0]['name'] }}"
+nic_sg: "H_DenyTelnet"
+vm_size: Standard_B2s
+needs_public_ip: false
+managed_disk_type: Premium_LRS
+# buildserver: True
+
+# Disks if RHEL/Ubuntu:
+# disks:
+#   - lun: 0
+#     disk_size_gb: 20
+#     managed_disk_type: Standard_LRS
+#     mountpoint: /opt/data_disk1
+#     device: /dev/sdc
+#     fs: xfs
+
+# Disks if Windows
+# disks:
+#   - lun: 0
+#     disk_size_gb: 20
+#     managed_disk_type: Standard_LRS
+#     mountpoint: F
+#   - lun: 1
+#     disk_size_gb: 10
+#     managed_disk_type: Standard_LRS
+#     mountpoint: G

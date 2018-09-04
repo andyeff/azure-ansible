@@ -1,0 +1,10 @@
+---
+- include_vars:
+    file: "vars/{{ env }}/{{ dns_domain | regex_search('^(\\w+)') }}_domainjoin.yml"
+
+- include_tasks: linux.yml
+  when: (ansible_os_family | lower == 'redhat') or (ansible_os_family | lower == 'debian') and (domain_join == True)
+
+
+- include_tasks: windows.yml
+  when: (ansible_os_family | lower == 'windows') and (domain_join == True)

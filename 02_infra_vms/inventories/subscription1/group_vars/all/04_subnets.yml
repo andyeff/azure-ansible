@@ -1,0 +1,14 @@
+---
+
+subnets:
+  - name: primary
+    resource_group: "{{ resource_groups[0]['name'] }}"
+    ip_cidr: "10.10.0.0/24"
+    vnet: "{{ virtual_networks[0]['name'] }}"
+    sg: "SN_AllowHome"
+    
+  - name: secondary
+    resource_group: "{{ resource_groups[0]['name'] }}"
+    ip_cidr: "10.20.0.0/24"
+    vnet: "{{ virtual_networks[1]['name'] }}"
+    sg: "SN_AllowHome"

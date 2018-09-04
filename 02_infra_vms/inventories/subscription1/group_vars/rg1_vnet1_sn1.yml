@@ -1,0 +1,8 @@
+---
+# Group Vars to establish resource group, vnet, and subnet of VM's
+# Create similar named files for other rg/vnet/sn combos
+# Place VM's into similarly named group in main hosts inventory file
+
+vm_resgroup: "{{ resource_groups[0]['name'] }}"
+vm_vnet: "{{ virtual_networks[0]['name'] }}"
+vm_subnet: "{{ subnets[0]['name'] }}"

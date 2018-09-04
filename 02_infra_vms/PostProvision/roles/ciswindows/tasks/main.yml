@@ -1,0 +1,25 @@
+---
+- name: Check OS distro
+  fail:
+    msg: "OS is not Windows, failing"
+  when: ansible_os_family != 'Windows'
+
+- name: "Copy security hardening package to server"
+  win_copy:
+    src: files/
+    dest: c:\temp\cis-hardening
+
+- name: "Install hardening package"
+  win_shell: LGPO.exe /g .\localGPO\ /s .\CIS2012R2.inf /v > lgpo.out 2> lgpo.err
+  args:
+    chdir: C:\Temp\cis-hardening
+    executable: cmd
+  register: CISINF
+
+- name: "Check policy installed"
+  debug: var=CISINF
+
+- name: "Install Emet"
+  win_package:
+    path: c:\temp\cis-hardening\EMET.msi
+    state: present

@@ -1,0 +1,40 @@
+# vim: noai:ts=2:sw=2:et
+---
+
+# images on k5
+azure_images:
+  ubuntu_1604: 
+    offer: UbuntuServer
+    publisher: Canonical
+    sku: "16.04-LTS"
+    version: latest
+    os_type: Linux
+
+  rhel_73:
+    offer: RHEL
+    publisher: RedHat
+    sku: "7.3"
+    version: latest
+    os_type: Linux
+
+  win_2012:
+    offer: WindowsServer
+    publisher: MicrosoftWindowsServer
+    sku: "2012-R2-Datacenter"
+    version: latest
+    os_type: Windows
+
+# region: "uk-1"
+# config_file: "{{ lookup('env', 'OS_CLIENT_CONFIG_FILE') }}"
+
+# defined in inventory but could be overwritten here if required
+# admin_username: localadm
+
+# Password kept here as can't use vaulted variables in Tower inventory yet
+admin_password: !vault |
+      $ANSIBLE_VAULT;1.1;AES256
+      36363763313961343732346136373637396232653736316530656430353335633965656164373936
+      3662326334353537363738323930383530323139336233330a393739326635346535313639366534
+      66613335366263376131343839386132323437356530393735653663306533333536343435356332
+      3261396130353662660a306464303434623933363332343239613731336465306330316161396161
+      3934

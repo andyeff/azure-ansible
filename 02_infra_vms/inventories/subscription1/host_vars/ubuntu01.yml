@@ -1,0 +1,5 @@
+---
+# Example of overruling a group_vars file for a single VM
+# Uncomment the below to allow this machine to gain a public_ip if the group it is a member of does not have this enabled
+
+# needs_public_ip: true

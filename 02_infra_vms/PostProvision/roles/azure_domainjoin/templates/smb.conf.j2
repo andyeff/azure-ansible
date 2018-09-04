@@ -1,0 +1,19 @@
+# {{ ansible_managed }}
+{% set workgroup = dns_domain.split('.')[0] | upper %}
+########################
+# SAMBA FILE DEFAULTS  #
+########################
+[global]
+workgroup = {{ workgroup }}
+client signing = yes
+client use spnego = yes
+kerberos method = secrets and keytab
+log file = /var/log/samba/smb.log
+log level = 2
+max log size = 25000
+realm = {{ dns_domain | upper }}
+security = ads
+idmap config * : backend = tdb
+idmap config * : range = 3000-7999
+idmap config MSAD : backend  = ad
+idmap config MSAD : range = 10000-999999

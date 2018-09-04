@@ -1,0 +1,42 @@
+---
+repositories_yum:
+  - name: "patches_rhel"
+    file: "patches_rhel"
+    description: "Hosted RHEL repository"
+    baseurl: "http://rhelpatch/rhui-rhel-7-server-rhui-rpms/"
+
+  # Misc examples below for CentOS  
+  # - name: "centos-updates"
+  #   file: "centos-base"
+  #   description: "CentOS Updates"
+  #   baseurl: "http://mirror.centos.org/centos/$releasever/updates/$basearch/"
+  #   gpgkey: "http://mirror.centos.org/centos/RPM-GPG-KEY-CentOS-7" }
+
+  # - name: "centos-extras"
+  #   file: "centos-base"
+  #   description: "CentOS Extras"
+  #   baseurl: "http://mirror.centos.org/centos/$releasever/extras/$basearch/"
+  #   gpgkey: "http://mirror.centos.org/centos/RPM-GPG-KEY-CentOS-7" }
+
+  # - name: "centos-centosplus"
+  #   file: "centos-base"
+  #   description: "CentOS Plus"
+  #   baseurl: "http://mirror.centos.org/centos/$releasever/centosplus/$basearch/"
+  #   gpgkey: "http://mirror.centos.org/centos/RPM-GPG-KEY-CentOS-7" }
+
+  # - name: "centos-contrib"
+  #   file: "centos-base"
+  #   description: "CentOS Contrib"
+  #   baseurl: "http://mirror.centos.org/centos/$releasever/contrib/$basearch/"
+  #   gpgkey: "http://mirror.centos.org/centos/RPM-GPG-KEY-CentOS-7" }
+
+  # - name: "epel-base"
+  #   file: "epel-release"
+  #   description: "EPEL Release"
+  #   baseurl: "https://dl.fedoraproject.org/pub/epel/6/$basearch/"
+  #   gpgkey: "https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-6" }
+
+yum_excludes:
+  - "kernel*"
+  - "redhat-release*"
+  - "initscripts*"

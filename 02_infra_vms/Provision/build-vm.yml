@@ -1,0 +1,22 @@
+---
+- name: "Build virtual machines"
+  hosts: all
+  gather_facts: no
+  tasks:
+  - name: "Role: Build VMs"
+    import_role:
+      name: build_vm
+    tags: create_vm
+    # when: (buildserver is defined) and (buildserver == True)
+
+
+- name: "Mount data volumes"
+  hosts: all
+  gather_facts: no
+  tasks:
+  - name: "Role: Mount data volumes"
+    import_role:
+      name: attach_datadisks
+    tags: mount_disks
+    # when: (buildserver is defined) and (buildserver == True)
+
